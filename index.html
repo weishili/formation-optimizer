@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="输入双方数据，精确比较随机匹配下的获胜次数，寻找最优出战顺序。">
+  <title>阵序 · 胜率计算器</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23168777'/%3E%3Cpath d='M8 23v-7m8 7V11m8 12V5' stroke='white' stroke-width='4'/%3E%3C/svg%3E">
+  <style>
+    :root{--ink:#172b3b;--muted:#76838c;--bg:#f3f6f7;--paper:#fff;--line:#e5ebee;--teal:#168777;--teal-dark:#116d61;--teal-soft:#eaf6f2;--nav:#142d39;--red:#c65f59;--amber:#c89543;--shadow:0 5px 22px rgba(30,55,70,.035);--radius:18px}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button,a,input,select{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:disabled{cursor:wait;opacity:.6}button,select,a{touch-action:manipulation}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #64c4b7;outline-offset:3px}button svg,a svg{flex-shrink:0}a{color:inherit;text-decoration:none}[hidden]{display:none!important}h1,h2,h3,p{margin:0}h1,h2,h3{font-weight:650}svg{display:block}button{border:0}.muted{color:var(--muted)}
+    .sidebar{width:88px;position:fixed;inset:0 auto 0 0;background:var(--nav);display:flex;align-items:center;flex-direction:column;padding:31px 12px 24px;color:#a9bfc7;z-index:5}.brand-symbol{width:40px;height:40px;border-radius:13px;background:#2eae96;display:grid;place-items:center;color:#fff;box-shadow:0 5px 18px #081f2d40}.brand-name{font-size:14px;color:#fff;letter-spacing:3px;margin:9px 0 45px;padding-left:3px}.side-nav{display:flex;flex-direction:column;gap:15px;width:100%}.nav-item{display:flex;gap:6px;flex-direction:column;align-items:center;padding:12px 0;border-radius:12px;font-size:10px;letter-spacing:1px;transition:background .18s,color .18s}.nav-item:hover{background:#ffffff0c;color:white}.nav-item.active{background:#ffffff13;color:#8dd9c8}.side-bottom{margin-top:auto;font-size:10px;writing-mode:vertical-rl;letter-spacing:3px;opacity:.65}
+    .workspace{margin-left:88px;padding:29px 42px 26px}.page-wrap{max-width:1290px;margin:0 auto}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:35px}.breadcrumb{display:flex;align-items:center;gap:10px;color:#839199;font-size:12px;letter-spacing:.4px}.breadcrumb strong{color:#4c616d;font-weight:500}.online-dot{width:6px;height:6px;display:inline-block;border-radius:50%;background:#41a68a;margin-right:7px}.save-status{font-size:11px;color:#84949a;text-align:right}.hero{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:29px}.eyebrow{font-size:10px;font-weight:700;letter-spacing:2.2px;color:var(--teal);margin-bottom:9px}.hero h1{font-size:31px;letter-spacing:-1px;line-height:1.5;margin-bottom:7px}.hero p{font-size:13px;color:var(--muted);max-width:710px}.hero-mark{display:flex;align-items:flex-end;gap:7px;height:70px;padding:6px 12px 7px;flex-shrink:0}.hero-mark span{display:block;width:14px;border-radius:5px;background:#cfe9e2}.hero-mark span:nth-child(1){height:28px}.hero-mark span:nth-child(2){height:45px;background:#8fcab9}.hero-mark span:nth-child(3){height:61px;background:var(--teal)}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.toolbar-left,.toolbar-right{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.button{display:inline-flex;justify-content:center;align-items:center;gap:7px;border-radius:9px;padding:9px 13px;line-height:1.5;background:#fff;border:1px solid #dfe7e9;color:#536872;font-weight:500;font-size:12px;transition:background .16s,border-color .16s,box-shadow .16s}.button:hover{background:#f7fbfa;border-color:#a9cfc4}.button:active{transform:translateY(1px)}.button-quiet{background:transparent;border-color:transparent;color:#7f8e96}.button-quiet:hover{background:#e9eef0;border-color:transparent}.button-primary{background:var(--teal);border-color:var(--teal);color:white;box-shadow:0 4px 10px #1687771c}.button-primary:hover{background:var(--teal-dark);border-color:var(--teal-dark)}.button-primary svg{color:#d6f7ea}.button-large{padding:12px 18px;font-size:13px;border-radius:10px}.button-small{padding:7px 11px}.panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.setup-grid{display:grid;grid-template-columns:minmax(0,1fr) 305px;gap:19px;margin-bottom:21px}.own-panel{padding:25px 27px 23px}.section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:20px}.heading-line{display:flex;gap:10px;align-items:center}.section-number{height:23px;min-width:23px;display:inline-grid;place-items:center;background:var(--teal-soft);color:var(--teal);border-radius:7px;font-family:"Segoe UI",sans-serif;font-size:10px;font-weight:700}.section-head h2,.heading-line h2{font-size:16px;letter-spacing:.15px}.section-subtitle{color:var(--muted);font-size:11px;margin-top:6px}.badge{display:inline-flex;align-items:center;gap:5px;background:#f2f5f6;border:1px solid #e8edef;border-radius:6px;color:#71838b;padding:3px 8px;font-size:10px;white-space:nowrap;font-weight:500}.badge.green{background:#edf7f3;color:#368c74;border-color:#dcefe7}.column-labels{display:grid;grid-template-columns:40px repeat(5,minmax(0,1fr));gap:10px;margin-bottom:8px;text-align:center;color:#9aa6ac;font-size:10px}.number-row{display:grid;grid-template-columns:40px repeat(5,minmax(0,1fr));gap:10px;align-items:center;margin:10px 0}.group-label{display:inline-grid;place-items:center;height:38px;width:34px;font-size:13px;font-weight:700;color:#3f7a6d;background:#ecf5f2;border-radius:8px}.number-row:nth-child(2) .group-label{color:#58789c;background:#eef3f9}.number-row:nth-child(3) .group-label{color:#92774a;background:#f7f3eb}.number-input{width:100%;min-width:0;height:43px;border:1px solid #dfe7e9;background:#fafcfc;border-radius:9px;text-align:center;padding:7px 5px;color:var(--ink);font-size:15px;font-variant-numeric:tabular-nums;transition:border-color .16s,background .16s,box-shadow .16s}.number-input::placeholder{color:#bac4c9;font-weight:300}.number-input:hover{border-color:#bed1d0}.number-input:focus{outline:0;border-color:#3ca997;background:#fff;box-shadow:0 0 0 3px #16877713}.number-input::-webkit-outer-spin-button,.number-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.number-input[type=number]{-moz-appearance:textfield}.number-input[aria-invalid=true],.number-input.error{border-color:#d98680;background:#fff7f5}.input-tip{display:flex;align-items:center;gap:6px;color:#99a4aa;font-size:10px;margin-top:16px;line-height:1.6}.own-footer{margin-top:21px;padding-top:20px;border-top:1px solid #edf1f2;display:flex;align-items:center;justify-content:space-between;gap:16px}.own-footer p{font-size:11px;color:#97a3a8;max-width:260px}.own-footer .button{flex-shrink:0}
+    .rule-panel{padding:25px 23px;background:linear-gradient(155deg,#fff 30%,#f6faf8)}.rule-panel h2{font-size:14px;margin-bottom:16px;display:flex;align-items:center;gap:8px}.rule-panel h2 svg{color:#83a298}.setting{margin-bottom:14px}.setting label{font-size:11px;color:#8a989e;display:block;margin-bottom:6px}.setting select{width:100%;height:37px;padding:0 10px;border:1px solid #dfe8e6;border-radius:8px;background:#fff;color:#546971;font-size:11px;cursor:pointer}.rule-notes{border-top:1px solid #e5eeea;padding-top:13px;margin-top:17px}.rule-note{font-size:10px;color:#8a999f;display:flex;gap:7px;line-height:1.8;margin:4px 0}.rule-note::before{content:"";width:4px;height:4px;background:#8db9a9;border-radius:50%;margin-top:7px;flex-shrink:0}.feedback{border-radius:10px;font-size:12px;line-height:1.8;color:#a45142;background:#fff0eb;border:1px solid #f3dace;padding:11px 16px;margin:0 0 18px}.feedback:empty{display:none}.feedback.success{background:var(--teal-soft);color:#347c69;border-color:#d4eadd}
+    .results-panel{padding:23px 27px;margin-bottom:28px;scroll-margin-top:20px}.results-panel>.section-head{margin-bottom:13px}.empty-results{min-height:130px;display:flex;align-items:center;justify-content:center;gap:19px;padding:20px 15px}.empty-icon{width:58px;height:58px;border-radius:17px;background:#eff5f3;color:#97baaf;display:grid;place-items:center;flex-shrink:0}.empty-results h3{font-size:13px;color:#6a8088;font-weight:500;margin-bottom:4px}.empty-results p{font-size:11px;color:#a0adb1}.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}.metric-card{background:#f6f9f9;border:1px solid #eaf0ef;border-radius:13px;padding:17px 19px}.metric-card:first-child{background:#edf7f2;border-color:#d8eee4}.metric-label{color:#84968f;font-size:11px}.metric-value{font-size:31px;font-weight:650;font-variant-numeric:tabular-nums;line-height:1.3;color:#267e69;margin:7px 0}.metric-card p,.metric-detail{font-size:11px;color:#8b9c99}.result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:17px 0}.sequence-card{border:1px solid var(--line);border-radius:12px;padding:16px}.sequence-card h3{font-size:12px;margin-bottom:12px;display:flex;align-items:center;gap:8px}.sequence-card p{font-size:10px;color:var(--muted);margin-top:10px}.number-chip{display:inline-flex;align-items:center;justify-content:center;min-width:33px;min-height:33px;border-radius:7px;background:#edf6f2;color:#287d69;padding:4px 7px;margin:2px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}.notice{background:#f2f7f9;border:1px solid #e4eef1;border-radius:10px;padding:12px 15px;color:#738b96;font-size:11px;line-height:1.9;margin:14px 0}.notice strong{color:#4e7280;font-weight:600}.table-wrap{width:100%;overflow-x:auto;border:1px solid #e8eef0;border-radius:11px;margin:17px 0}.compare-table{width:100%;border-collapse:collapse;text-align:left;font-size:12px;white-space:nowrap}.compare-table th{background:#f6f8f9;color:#8b9a9f;font-size:10px;font-weight:500;padding:11px 14px}.compare-table td{border-top:1px solid #eef2f3;padding:12px 14px;color:#607680;font-variant-numeric:tabular-nums}.compare-table tbody tr:hover{background:#fcfdfd}.compare-table td:first-child{color:var(--ink);font-weight:500}.compare-table .win{color:var(--teal)}.compare-table .loss{color:var(--red)}.score-bar{height:5px;display:flex;overflow:hidden;border-radius:5px;background:#eaf0f1;min-width:90px;margin:5px 0}.score-win{background:#49a58b;height:100%}.score-tie{background:#d4bc84;height:100%}.score-loss{background:#d7a09b;height:100%}.comparison-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.mini-result{border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11px}.mini-result h3{font-size:12px;margin-bottom:8px}.mapping-list{padding:0;list-style:none;color:#7d9299;font-size:11px}.mapping-list li{display:flex;justify-content:space-between;border-top:1px solid #edf2f3;padding:7px 0;gap:15px}
+    .opponents-section{scroll-margin-top:22px}.opponents-section>.section-head{align-items:center;margin-bottom:17px}.opponent-heading-right{display:flex;align-items:center;gap:12px}.opponent-count{font-size:11px;color:#91a0a5}.opponents-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.opponent-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px 16px 13px;box-shadow:var(--shadow);transition:border-color .15s}.opponent-card:focus-within{border-color:#accfc5}.opponent-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}.opponent-name{font-size:12px;font-weight:600;color:#526c77;min-width:0}.opponent-name:where(input){width:100%;border:0;outline:0;background:transparent;padding:0}.opponent-name:where(input):focus-visible{outline:2px solid #9bcbbf;outline-offset:3px;border-radius:2px}.remove-opponent{width:25px;height:25px;background:transparent;border-radius:6px;color:#a9b6bb;display:inline-grid;place-items:center;font-size:18px;line-height:1;flex-shrink:0}.remove-opponent:hover{background:#fff1ef;color:#bc766d}.opponent-card .number-row{grid-template-columns:22px repeat(5,minmax(0,1fr));gap:5px;margin:8px 0}.opponent-card .group-label{width:20px;height:28px;background:transparent!important;font-size:10px;font-weight:600;color:#9aabb2}.opponent-card .number-input{height:34px;border-radius:6px;font-size:12px;padding:5px 2px;background:#fcfdfd;border-color:#e6ecee}.opponent-card .number-input:focus{background:#fff}.opponent-card .column-labels{grid-template-columns:22px repeat(5,minmax(0,1fr));gap:5px;margin-bottom:4px;font-size:9px}.card-status{display:flex;align-items:center;gap:5px;font-size:9px;color:#b0babf;padding-left:27px;margin-top:11px;min-height:15px}.card-status.complete{color:#45977d}.card-status.partial{color:#bb945c}.card-status.error{color:var(--red)}.page-footer{display:flex;justify-content:space-between;gap:15px;margin:25px 0 2px;padding-top:18px;border-top:1px solid #e1e8eb;color:#9aa8af;font-size:10px}.page-footer span:last-child{letter-spacing:1.4px;color:#acb8bd;font-size:9px}.footer-dot{color:#b1c1c7;padding:0 5px}.error{color:var(--red)}.result-actions{display:flex;align-items:center;gap:10px;margin:15px 0}.result-content h3{font-size:13px;margin:16px 0 10px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(min-width:1500px){.workspace{padding-top:36px}.hero{margin-bottom:34px}.setup-grid{grid-template-columns:minmax(0,1fr) 330px}.own-panel{padding:27px 30px}.rule-panel{padding:26px}}
+    @media(max-width:1150px){.workspace{padding:25px}.setup-grid{grid-template-columns:minmax(0,1fr) 265px;gap:15px}.own-panel{padding:23px 20px}.rule-panel{padding:23px 18px}.opponents-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.number-row,.column-labels{gap:7px;grid-template-columns:30px repeat(5,minmax(0,1fr))}.group-label{width:28px}.own-footer p{max-width:200px;font-size:10px}.results-panel{padding:23px 20px}}
+    @media(max-width:900px){.sidebar{width:72px;padding-left:9px;padding-right:9px}.workspace{margin-left:72px;padding:23px}.setup-grid{grid-template-columns:1fr}.rule-panel{display:grid;grid-template-columns:1fr 1fr;column-gap:18px;padding:20px}.rule-panel h2{grid-column:1/-1;margin-bottom:12px}.rule-notes{grid-column:1/-1;margin-top:2px;padding-top:10px;display:flex;gap:6px 15px;flex-wrap:wrap}.setting{margin-bottom:10px}.hero h1{font-size:28px}.hero-mark{display:none}.result-grid{gap:9px}.sequence-card{padding:12px}.number-chip{min-width:26px;min-height:28px;padding:3px 5px;font-size:12px;margin:1px}.metric-card{padding:14px}.metric-value{font-size:28px}.hero{margin-bottom:23px}.topbar{margin-bottom:29px}}
+    @media(max-width:650px){.sidebar{display:none}.workspace{margin-left:0;padding:20px 16px}.topbar{margin-bottom:25px}.breadcrumb{font-size:10px;gap:6px}.save-status{font-size:9px;max-width:140px}.hero h1{font-size:27px;letter-spacing:-.5px}.hero p{font-size:11px;line-height:1.9}.eyebrow{font-size:9px;margin-bottom:7px}.toolbar{align-items:center;gap:4px}.toolbar-left,.toolbar-right{gap:3px}.button{padding:8px 10px;font-size:10px;gap:5px}.toolbar-right .button{padding-left:6px;padding-right:6px}.toolbar .button svg{width:12px;height:12px}.own-panel{padding:20px 17px}.section-head h2,.heading-line h2{font-size:14px}.section-subtitle{font-size:10px;line-height:1.8}.section-number{width:21px;height:21px;font-size:9px;border-radius:6px}.heading-line{gap:8px}.number-row,.column-labels{grid-template-columns:24px repeat(5,minmax(0,1fr));gap:6px}.group-label{width:23px;height:33px;font-size:11px}.number-input{height:40px;font-size:14px;border-radius:7px}.own-footer{margin-top:18px;padding-top:16px;gap:12px}.own-footer p{max-width:160px;line-height:1.8}.button-large{font-size:12px;padding:11px 14px}.input-tip{font-size:9px;align-items:flex-start}.input-tip svg{margin-top:2px;flex-shrink:0}.rule-panel{padding:18px 17px;column-gap:13px}.rule-panel h2{font-size:12px}.setting label{font-size:10px}.setting select{font-size:10px;padding-left:7px}.rule-note{font-size:9px}.results-panel{padding:20px 17px;margin-bottom:24px}.empty-results{min-height:145px;padding:16px 4px;gap:13px}.empty-icon{width:47px;height:47px;border-radius:13px}.empty-results h3{font-size:12px}.empty-results p{font-size:10px}.opponents-grid{grid-template-columns:1fr;gap:13px}.opponent-card{padding:18px 17px 14px}.opponent-card .number-input{height:37px;font-size:13px}.opponent-card .number-row{gap:7px}.opponent-card .column-labels{gap:7px}.opponent-name{font-size:12px}.opponent-heading-right{gap:7px}.opponent-count{font-size:9px}.metric-grid{gap:7px}.metric-card{padding:11px 9px;border-radius:10px}.metric-label{font-size:9px}.metric-value{font-size:24px}.metric-card p,.metric-detail{font-size:9px}.result-grid{grid-template-columns:1fr}.sequence-card{display:block;padding:12px 14px}.sequence-card h3{display:inline-flex;margin:0 12px 0 0}.sequence-card p{margin-top:6px}.number-chip{min-width:32px;margin:2px;padding:5px}.comparison-grid{grid-template-columns:1fr}.page-footer{font-size:9px;gap:10px}.page-footer span:last-child{display:none}.feedback{font-size:11px}.compare-table th,.compare-table td{padding:10px}.notice{font-size:10px;padding:10px 12px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
+    @media print{.sidebar,.toolbar,.rule-panel,.own-footer,.opponents-section,.page-footer{display:none}.workspace{margin:0;padding:0}.setup-grid{display:block}.panel{box-shadow:none;break-inside:avoid}.results-panel{margin-top:16px}.hero{margin:10px 0 20px}.topbar{margin-bottom:15px}.page-wrap{max-width:none}body{background:white}}
+    .group-fields{display:contents}.metric-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.metric-value small{font-size:12px;font-weight:500;color:#7d9690}.metric-card>.muted{display:block;font-size:10px;line-height:1.8}.result-heading,.sequence-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.text-button{background:#eaf6f2;color:var(--teal);border-radius:7px;padding:7px 12px;font-size:11px}.text-button:hover{background:#dcf0e8}.sequence-head{margin-bottom:12px;font-size:10px}.sequence-values{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.number-chip{min-width:0;overflow-wrap:anywhere;font-size:clamp(10px,1.1vw,15px)}.source-order{margin-top:10px;font-size:10px;color:#899da3}.outcome-summary{margin:20px 0 26px}.score-bar{height:8px}.score-legend{display:flex;gap:20px;margin-top:9px;font-size:11px}.score-legend span:nth-child(1){color:#328b73}.score-legend span:nth-child(2){color:#a68c52}.score-legend span:nth-child(3){color:#bc827d}.comparison-grid{grid-template-columns:1fr}.detail-caption{font-size:11px;margin-bottom:14px;line-height:1.8}.mini-result{padding:0;min-width:0;overflow:hidden}.mini-result summary{display:flex;align-items:center;justify-content:space-between;gap:18px;cursor:pointer;padding:14px 16px;background:#fbfcfc;list-style:none}.mini-result summary::before{content:'＋';color:#7d9e91;font-size:15px}.mini-result[open] summary::before{content:'−'}.opponent-result-name{margin-right:auto;overflow-wrap:anywhere;min-width:0}.mini-result .table-wrap{margin:0;border:0;border-radius:0}.outcome-groups{display:flex;gap:17px;flex-wrap:wrap}.outcome-row{display:flex;align-items:center;gap:3px}.outcome-row b{font-size:10px;margin-right:3px;color:#80959c}.outcome{padding:2px 4px;border-radius:4px;font-size:10px}.outcome.win{background:#eaf6ef;color:#278267}.outcome.tie{background:#faf4e8;color:#a48847}.outcome.loss{background:#fbefec;color:#b66f68}.calculation-footnote{margin-top:17px;color:#8fa0a6;font-size:10px;line-height:1.9}.mode-description{font-size:10px;color:#63867d;line-height:1.9;grid-column:1/-1;background:#eef6f2;padding:9px 11px;border-radius:7px}.card-status.ready{color:#45977d}.feedback:not(.error){color:#347c69;background:var(--teal-soft);border-color:#d4eadd}.number-input.invalid{border-color:#d98680;background:#fff7f5}button:disabled{cursor:not-allowed}.opponents-section>.section-head{flex-wrap:wrap}.opponent-heading-right{flex-wrap:wrap}.empty-results:has(>strong){flex-direction:column;gap:8px;text-align:center}.empty-results>strong{color:#6a8088;font-size:13px;font-weight:500}
+    @media(max-width:1150px){.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metric-value{font-size:29px}}
+    @media(max-width:650px){.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metric-card{padding:15px 12px}.metric-value{font-size:27px}.metric-value small{font-size:10px}.metric-card>.muted{font-size:9px}.number-chip{font-size:14px}.score-legend{gap:12px;font-size:10px}.mini-result summary{gap:9px;padding:12px 10px;flex-wrap:wrap}.mini-result summary>.muted{width:100%;padding-left:23px;font-size:10px}.outcome-groups{flex-direction:column;gap:5px}.compare-table{font-size:10px}.compare-table td,.compare-table th{padding:10px 7px}.sequence-head .group-label{width:29px;height:29px}.rule-notes{display:block}.mode-description{font-size:10px}.opponent-heading-right{width:100%;justify-content:space-between}.own-footer{flex-wrap:wrap}.own-footer p{max-width:none}}
+    #own-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 11px}.own-number-field{display:flex;flex-direction:column;gap:5px;min-width:0}.own-number-index{font-size:10px;color:#92a3ab;text-align:left;padding-left:3px}.own-pool-note{font-size:11px;line-height:1.8;color:#7b929a;margin-bottom:15px}.rule-panel .setting{grid-column:1/-1}.algorithm-details{background:#f7faf9;border:1px solid #e6eeea;border-radius:10px;margin:14px 0;padding:11px 15px;font-size:11px;color:#78918a;line-height:1.9}.algorithm-details summary{cursor:pointer;color:#487a6a}.algorithm-details p{margin-top:8px}.slot-caption{font-size:9px;color:#92a3aa;text-align:center}.sequence-slot{min-width:0;text-align:center}.sequence-slot .number-chip{display:flex;margin:4px 0;min-width:0;padding:5px 2px}.source-index{font-size:10px;color:#8b9f9a}.sequence-values{gap:6px}.result-content .result-heading{margin-top:19px}.sequence-card{min-width:0}
+    @media(max-width:650px){#own-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 10px}.own-number-field .number-input{font-size:16px;height:43px}.own-number-index{font-size:10px}.own-pool-note{font-size:10px}.result-grid .number-chip{font-size:13px}.sequence-slot .number-chip{min-height:38px}.algorithm-details{padding:10px 12px;font-size:10px}}
+    .input-index{font-size:10px;color:#92a3ab;padding-left:3px}.result-position{display:flex;flex-direction:column;align-items:stretch;min-width:0;text-align:center}.result-position .number-chip{display:flex;margin:4px 0;min-width:0;min-height:37px;padding:5px 2px}.result-position .source-index{font-size:9px;white-space:nowrap}.algorithm-details>summary{justify-content:flex-start}.algorithm-details>p{margin:10px 0 0}
+  </style>
+</head>
+<body>
+  <aside class="sidebar" aria-label="页面导航">
+    <a href="#" class="brand-symbol" aria-label="阵序首页"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="13" width="4" height="7" rx="1.2" fill="currentColor" opacity=".55"/><rect x="10" y="8" width="4" height="12" rx="1.2" fill="currentColor" opacity=".8"/><rect x="17" y="3" width="4" height="17" rx="1.2" fill="currentColor"/></svg></a>
+    <div class="brand-name">阵序</div>
+    <nav class="side-nav">
+      <a class="nav-item active" href="#own-section"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M14 17.5h7m-3.5-3.5v7"/></svg><span>排阵</span></a>
+      <a class="nav-item" href="#opponents-section"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 4v2"/></svg><span>对手</span></a>
+      <a class="nav-item" href="#results"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 3v17h17M8 15l4-5 4 2 5-7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>分析</span></a>
+    </nav>
+    <div class="side-bottom">每一个位置，都有更好的可能</div>
+  </aside>
+  <main class="workspace">
+    <div class="page-wrap">
+      <div class="topbar">
+        <div class="breadcrumb"><strong>阵序实验室</strong><span>/</span><span>胜率优化器</span></div>
+        <div class="save-status"><span class="online-dot" aria-hidden="true"></span><span id="save-status">数据仅保存在当前浏览器</span></div>
+      </div>
+      <header class="hero">
+        <div><div class="eyebrow">自由分组 · 全局最优</div><h1>找到更好的出战顺序<span style="color:#268c77">。</span></h1><p>填入 15 个数字，自动组合成 A / B / C 三组，找到随机匹配下单项胜率最高的排法。</p></div>
+        <div class="hero-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      </header>
+      <div class="toolbar" aria-label="数据操作">
+        <div class="toolbar-left">
+          <button id="demo" class="button" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z" stroke-linejoin="round"/></svg>填入示例</button>
+          <button id="reset" class="button button-quiet" type="button">清空数据</button>
+        </div>
+        <div class="toolbar-right">
+          <button id="import-data" class="button button-quiet" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v4h16v-4" stroke-linecap="round" stroke-linejoin="round"/></svg>导入数据</button>
+          <button id="export-data" class="button button-quiet" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M4 16v4h16v-4" stroke-linecap="round" stroke-linejoin="round"/></svg>导出数据</button>
+          <input id="import-file" type="file" accept=".json,application/json" hidden aria-label="选择要导入的 JSON 数据文件">
+        </div>
+      </div>
+      <div id="feedback" class="feedback" role="alert" aria-live="polite"></div>
+      <div class="setup-grid">
+        <section id="own-section" class="panel own-panel" aria-labelledby="own-title">
+          <div class="section-head">
+            <div><div class="heading-line"><span class="section-number">01</span><h2 id="own-title">我方数据</h2></div><p class="section-subtitle">填入 15 个数字，无需提前分组</p></div>
+            <span class="badge green">自由重组 · 自动排阵</span>
+          </div>
+          <p class="own-pool-note">编号仅用于识别输入，所有数字都可自由跨组、调整位置。</p>
+          <div id="own-grid"></div>
+          <p class="input-tip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="5" y="5" width="14" height="16" rx="2"/><path d="M9 5V3h6v2M9 10h6m-6 4h6"/></svg>可一次粘贴全部 15 个数字，支持逗号、空格或换行分隔</p>
+          <div class="own-footer"><p>输入完成后，开始计算最优排列。</p><button id="calculate" class="button button-primary button-large" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m13 2-8 12h6l-1 8 9-13h-6l1-7Z" stroke-linejoin="round"/></svg>计算最优排列<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        </section>
+        <aside class="panel rule-panel" aria-labelledby="rule-title">
+          <h2 id="rule-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="white"/><circle cx="15" cy="17" r="2" fill="white"/></svg>计算规则</h2>
+          <div class="setting"><label for="direction">单个位置的获胜条件</label><select id="direction"><option value="higher">数字大者获胜</option><option value="lower">数字小者获胜</option></select></div>
+          <p id="mode-description" class="mode-description"></p>
+          <div class="rule-notes"><p class="rule-note">双方三组随机一一匹配，6 种情况等概率。</p><p class="rule-note">逐位置比较，累计获胜次数；各对手等权。</p><p class="rule-note">数字相同计平局，仍计入总比较次数。</p></div>
+        </aside>
+      </div>
+      <section id="results" class="panel results-panel" aria-labelledby="results-title">
+        <div class="section-head"><div class="heading-line"><span class="section-number">02</span><h2 id="results-title">最优排列组合</h2></div><span class="badge">全局精确最优</span></div>
+        <div id="empty-results" class="empty-results">
+          <div class="empty-icon"><svg width="29" height="29" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="4" y="17" width="5" height="10" rx="1.4"/><rect x="13.5" y="11" width="5" height="16" rx="1.4"/><rect x="23" y="5" width="5" height="22" rx="1.4"/><path d="M4 10l5-4 5 1" stroke-linecap="round"/></svg></div>
+          <div><h3>最优排列，等待你的数据</h3><p>填写我方和至少 1 个对手，或点击「填入示例」体验。</p></div>
+        </div>
+        <div id="result-content" class="result-content" aria-live="polite" hidden></div>
+      </section>
+      <section id="opponents-section" class="opponents-section" aria-labelledby="opponents-title">
+        <div class="section-head"><div><div class="heading-line"><span class="section-number">03</span><h2 id="opponents-title">对手数据</h2></div><p class="section-subtitle">每位对手同样包含 A / B / C 三组；未填写的对手自动跳过。</p></div><div class="opponent-heading-right"><span id="opponent-count" class="opponent-count">0 个有效对手</span><button id="add-opponent" type="button" class="button button-small"><span aria-hidden="true">＋</span>添加对手</button></div></div>
+        <div id="opponents-grid" class="opponents-grid"></div>
+      </section>
+      <footer class="page-footer"><div>纯本地计算<span class="footer-dot">·</span>数据无需上传<span class="footer-dot">·</span>支持离线使用</div><span>ARRANGEMENT LAB / 阵序</span></footer>
+    </div>
+  </main>
+  <script>
+(function (root) {
+  'use strict';
+  function permutations(values) {
+    if (!values.length) return [[]];
+    return values.flatMap((value, i) => permutations(values.filter((_, j) => j !== i)).map(tail => [value, ...tail]));
+  }
+  const orders = permutations([0, 1, 2]);
+  const positions = permutations([0, 1, 2, 3, 4]);
+  function compare(a, b, direction = 'higher') {
+    if (a === b) return 0;
+    return (direction === 'lower' ? a < b : a > b) ? 1 : -1;
+  }
+  function validate(own, opponents, direction, mode) {
+    const validRows = rows => Array.isArray(rows) && rows.length === 3 && rows.every(row => Array.isArray(row) && row.length === 5 && row.every(Number.isFinite));
+    const validOwn = mode === 'global' ? Array.isArray(own) && own.length === 15 && own.every(Number.isFinite) : validRows(own);
+    if (!validOwn || !Array.isArray(opponents) || !opponents.length || opponents.some(item => !item || !validRows(item.groups))) throw new Error('需要完整的我方 15 个数字和至少一个完整对手。');
+    if (!['higher', 'lower'].includes(direction) || !['global', 'internal', 'groups'].includes(mode)) throw new Error('无效的计算规则。');
+  }
+  function evaluate(own, opponents, direction = 'higher') {
+    let wins = 0, ties = 0, losses = 0;
+    const details = opponents.map(opponent => {
+      const cases = orders.map(order => {
+        let win = 0, tie = 0, loss = 0;
+        const groups = own.map((row, i) => {
+          const outcomes = row.map((value, k) => compare(value, opponent.groups[order[i]][k], direction));
+          for (const outcome of outcomes) {
+            if (outcome === 1) win++;
+            else if (outcome === 0) tie++;
+            else loss++;
+          }
+          return outcomes;
+        });
+        return { order: order.slice(), win, tie, loss, groups };
+      });
+      const sum = cases.reduce((acc, item) => ({ win: acc.win + item.win, tie: acc.tie + item.tie, loss: acc.loss + item.loss }), { win: 0, tie: 0, loss: 0 });
+      wins += sum.win; ties += sum.tie; losses += sum.loss;
+      return { name: opponent.name, cases, wins: sum.win, ties: sum.tie, losses: sum.loss, rate: sum.win / 90, expectedWins: sum.win / 6 };
+    });
+    const total = 90 * opponents.length;
+    return { wins, ties, losses, total, rate: wins / total, tieRate: ties / total, lossRate: losses / total, expectedWins: wins / (6 * opponents.length), details };
+  }
+  // Random group matching gives every input value the same three possible opponents
+  // in its chosen column. Assign 15 distinct input occurrences to 5 columns of
+  // capacity 3. A base-4 state stores the used capacity of all columns; its digit
+  // sum is the next input index. Merging equivalent prefixes preserves the exact
+  // maximum over every 15! placement, including values moving between groups.
+  function optimizeGlobal(own, opponents, direction) {
+    const score = own.map(value => Array.from({ length: 5 }, (_, column) => opponents.reduce((total, opponent) => total + opponent.groups.reduce((sum, row) => sum + Number(compare(value, row[column], direction) === 1), 0), 0)));
+    const powers = [1, 4, 16, 64, 256];
+    const dp = new Int32Array(1024).fill(-1);
+    const previous = new Int16Array(1024).fill(-1);
+    const chosen = new Int8Array(1024).fill(-1);
+    dp[0] = 0;
+    let transitions = 0;
+    for (let state = 0; state < 1023; state++) {
+      const counts = powers.map(power => Math.floor(state / power) % 4);
+      const input = counts.reduce((sum, count) => sum + count, 0);
+      for (let column = 0; column < 5; column++) {
+        if (counts[column] === 3) continue;
+        const next = state + powers[column];
+        const candidate = dp[state] + score[input][column];
+        transitions++;
+        if (candidate > dp[next]) {
+          dp[next] = candidate;
+          previous[next] = state;
+          chosen[next] = column;
+        }
+      }
+    }
+    const columns = Array.from({ length: 5 }, () => []);
+    let state = 1023;
+    for (let input = 14; input >= 0; input--) {
+      columns[chosen[state]].push(input);
+      state = previous[state];
+    }
+    // Stable presentation by input number, without changing the optimal score.
+    columns.forEach(column => column.sort((a, b) => a - b));
+    const rows = Array.from({ length: 3 }, (_, group) => {
+      const sourceOrder = columns.map(column => column[group]);
+      return { values: sourceOrder.map(index => own[index]), sourceOrder };
+    });
+    const arranged = rows.map(row => row.values);
+    const baseline = Array.from({ length: 3 }, (_, group) => own.slice(group * 5, group * 5 + 5));
+    return {
+      rows, arranged, current: evaluate(baseline, opponents, direction), best: evaluate(arranged, opponents, direction),
+      mode: 'global', direction, score: dp[1023],
+      search: { states: 1024, transitions, arrangements: 1307674368000, allocations: 168168000 }
+    };
+  }
+  function optimize(own, opponents, direction = 'higher', mode = 'global') {
+    validate(own, opponents, direction, mode);
+    if (mode === 'global') return optimizeGlobal(own, opponents, direction);
+    const rows = own.map(row => {
+      const score = row.map(value => Array.from({ length: 5 }, (_, k) => opponents.reduce((total, opponent) => total + opponent.groups.reduce((sum, group) => sum + Number(compare(value, group[k], direction) === 1), 0), 0)));
+      let best = -1, bestOrder = [0, 1, 2, 3, 4], bestMoves = Infinity;
+      let variants = new Set();
+      for (const order of mode === 'internal' ? positions : [[0, 1, 2, 3, 4]]) {
+        const sum = order.reduce((total, source, k) => total + score[source][k], 0);
+        const values = order.map(source => row[source]);
+        const moves = values.reduce((total, value, k) => total + Number(value !== row[k]), 0);
+        if (sum > best) { best = sum; variants = new Set(); bestMoves = Infinity; }
+        if (sum === best) {
+          variants.add(JSON.stringify(values));
+          if (moves < bestMoves) { bestMoves = moves; bestOrder = order.slice(); }
+        }
+      }
+      return { values: bestOrder.map(source => row[source]), sourceOrder: bestOrder, variants: variants.size, score: best };
+    });
+    const arranged = rows.map(row => row.values);
+    return { rows, arranged, current: evaluate(own, opponents, direction), best: evaluate(arranged, opponents, direction), variants: rows.reduce((count, row) => count * row.variants, 1), mode, direction };
+  }
+  root.MatchOptimizer = Object.freeze({ optimize, evaluate, compare, orders });
+})(typeof window === 'undefined' ? globalThis : window);
+
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const letters = ['A', 'B', 'C'];
+  const key = 'formation-optimizer-v1';
+  const emptyGroups = () => Array.from({ length: 3 }, () => Array(5).fill(''));
+  const fresh = () => ({ version: 2, own: Array(15).fill(''), opponents: Array.from({ length: 7 }, (_, i) => ({ name: `对手 ${i + 1}`, groups: emptyGroups() })), mode: 'global', direction: 'higher' });
+  let state = fresh();
+  let lastResult = null;
+  const numeric = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;
+  const isNumber = value => numeric.test(String(value).trim()) && Number.isFinite(Number(value));
+  const escape = value => String(value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  const percent = value => `${(value * 100).toFixed(2)}%`;
+  const decimal = value => Number(value.toFixed(2)).toString();
+  function feedback(message, error = false) {
+    $('feedback').textContent = message;
+    $('feedback').classList.toggle('error', error);
+    $('feedback').hidden = !message;
+  }
+  function normalize(data, { allowDrafts = false } = {}) {
+    if (!data || ![1, 2].includes(data.version) || !Array.isArray(data.opponents) || data.opponents.length < 1 || data.opponents.length > 50 || !(data.version === 1 ? ['internal', 'groups'].includes(data.mode) : data.mode === 'global') || !['higher', 'lower'].includes(data.direction)) throw new Error('文件格式不正确，请使用本页面导出的 JSON 数据。');
+    const number = value => {
+      if (typeof value !== 'string' && typeof value !== 'number') throw new Error('数据中存在无效数字。');
+      const text = allowDrafts && typeof value === 'string' ? value : String(value).trim();
+      if (text.length > 100 || (!allowDrafts && text !== '' && !isNumber(text)) || (typeof value === 'number' && !Number.isFinite(value))) throw new Error('数据中存在无效数字。');
+      return text;
+    };
+    const groups = rows => {
+      if (!Array.isArray(rows) || rows.length !== 3 || rows.some(row => !Array.isArray(row) || row.length !== 5)) throw new Error('对手必须有 3 组，每组 5 个数字。');
+      return rows.map(row => row.map(number));
+    };
+    const rawOwn = data.version === 1 ? groups(data.own).flat() : data.own;
+    if (!Array.isArray(rawOwn) || rawOwn.length !== 15) throw new Error('我方必须有 15 个数字输入位置。');
+    return { version: 2, own: rawOwn.map(number), opponents: data.opponents.map((opponent, i) => {
+      if (!opponent || typeof opponent !== 'object') throw new Error('对手数据格式不正确。');
+      return { name: typeof opponent.name === 'string' ? opponent.name.slice(0, 40) : `对手 ${i + 1}`, groups: groups(opponent.groups) };
+    }), mode: 'global', direction: data.direction };
+  }
+  let restored = false;
+  let loadFailed = false;
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) { state = normalize(JSON.parse(saved), { allowDrafts: true }); restored = true; }
+  } catch (_) { loadFailed = true; /* A blocked or unreadable local store never prevents calculation. */ }
+  function save() {
+    try {
+      localStorage.setItem(key, JSON.stringify(state));
+      $('save-status').textContent = '已保存到此浏览器';
+      return true;
+    } catch (_) {
+      $('save-status').textContent = '本地保存不可用，请导出备份';
+      return false;
+    }
+  }
+  function rowHTML(row, side, owner, group) {
+    return `<div class="number-row"><span class="group-label">${letters[group]}</span><div class="group-fields">${row.map((value, col) => `<input type="text" inputmode="decimal" class="number-input" autocomplete="off" spellcheck="false" maxlength="100" placeholder="${col + 1}" aria-label="${side === 'own' ? '我方' : `对手 ${owner + 1}`} ${letters[group]}组 第${col + 1}位" data-side="${side}" data-owner="${owner}" data-group="${group}" data-col="${col}" value="${escape(value)}">`).join('')}</div></div>`;
+  }
+  function renderInputs() {
+    $('own-grid').innerHTML = state.own.map((value, index) => `<label class="own-number-field"><span class="input-index">${index + 1}</span><input type="text" inputmode="decimal" class="number-input" autocomplete="off" spellcheck="false" maxlength="100" placeholder="—" aria-label="我方 第${index + 1}个数字" data-side="own" data-index="${index}" value="${escape(value)}"></label>`).join('');
+    $('opponents-grid').innerHTML = state.opponents.map((opponent, i) => `<article class="opponent-card" data-opponent="${i}"><div class="opponent-head"><input class="opponent-name" aria-label="对手 ${i + 1} 名称" data-name="${i}" maxlength="40" value="${escape(opponent.name)}"><button type="button" class="remove-opponent" data-remove="${i}" aria-label="删除对手 ${i + 1}" title="删除此对手">×</button></div>${opponent.groups.map((row, group) => rowHTML(row, 'opponent', i, group)).join('')}<div class="card-status" id="opponent-status-${i}"></div></article>`).join('');
+    $('direction').value = state.direction;
+    updateStatus();
+  }
+  function updateStatus() {
+    let ready = 0, partial = 0;
+    state.opponents.forEach((opponent, i) => {
+      const values = opponent.groups.flat();
+      const filled = values.filter(value => String(value).trim() !== '').length;
+      const valid = filled === 15 && values.every(isNumber);
+      if (valid) ready++; else if (filled) partial++;
+      const el = $(`opponent-status-${i}`);
+      if (el) { el.textContent = valid ? '● 已就绪 · 15 / 15' : filled ? `待补全或检查 · ${filled} / 15` : '未填写 · 计算时自动跳过'; el.classList.toggle('ready', valid); }
+    });
+    $('opponent-count').textContent = `${ready} 位已就绪${partial ? ` · ${partial} 位待检查` : ''} / 共 ${state.opponents.length} 位`;
+    $('add-opponent').disabled = state.opponents.length >= 50;
+    $('mode-description').textContent = '我方 15 个数字可跨组自由重排，计算后分成 A/B/C 三组，每组 5 个；对手组内顺序保持固定。';
+  }
+  function invalidate() {
+    if (lastResult) {
+      $('result-content').hidden = true;
+      $('empty-results').hidden = false;
+      $('empty-results').innerHTML = '<div class="empty-icon">↻</div><strong>数据已更新</strong><p>点击“计算最优排法”，查看最新结果。</p>';
+      lastResult = null;
+    }
+  }
+  function changed() {
+    invalidate(); feedback(''); updateStatus();
+    save();
+  }
+  document.addEventListener('input', event => {
+    const target = event.target;
+    if (target.matches('.number-input')) {
+      if (target.dataset.side === 'own') state.own[Number(target.dataset.index)] = target.value;
+      else state.opponents[Number(target.dataset.owner)].groups[Number(target.dataset.group)][Number(target.dataset.col)] = target.value;
+      target.classList.remove('invalid'); target.removeAttribute('aria-invalid'); changed();
+    } else if (target.matches('.opponent-name')) { state.opponents[Number(target.dataset.name)].name = target.value; changed(); }
+  });
+  document.addEventListener('paste', event => {
+    const target = event.target;
+    if (!target.matches('.number-input')) return;
+    const text = event.clipboardData.getData('text').trim();
+    const tokens = text.split(/[\s,，;；、]+/).filter(Boolean);
+    if (tokens.length <= 1) return;
+    event.preventDefault();
+    if (!tokens.every(value => value.length <= 100 && isNumber(value))) { feedback('粘贴内容包含无效数字，请用空格、逗号或换行分隔。', true); return; }
+    let selector;
+    if (target.dataset.side === 'own') {
+      const start = tokens.length === 15 ? 0 : Number(target.dataset.index);
+      if (start + tokens.length > 15) { feedback(`当前位置仅剩 ${15 - start} 个输入位置，请减少数字数量；粘贴完整 15 个数字可替换我方全部数据。`, true); return; }
+      tokens.forEach((value, index) => { state.own[start + index] = value; });
+      selector = `.number-input[data-side="own"][data-index="${target.dataset.index}"]`;
+    } else {
+      if (![5, 15].includes(tokens.length)) { feedback('对手数据请粘贴一组 5 个或完整的 15 个数字。', true); return; }
+      const rows = state.opponents[Number(target.dataset.owner)].groups;
+      if (tokens.length === 15) tokens.forEach((value, i) => { rows[Math.floor(i / 5)][i % 5] = value; });
+      else rows[Number(target.dataset.group)] = tokens;
+      selector = `.number-input[data-side="opponent"][data-owner="${target.dataset.owner}"][data-group="${target.dataset.group}"][data-col="${target.dataset.col}"]`;
+    }
+    renderInputs(); changed(); document.querySelector(selector)?.focus();
+    feedback(tokens.length === 15 ? '已填入该参赛者的全部 15 个数字。' : `已填入 ${tokens.length} 个数字。`);
+  });
+  document.addEventListener('click', event => {
+    const button = event.target.closest('[data-remove]');
+    if (!button) return;
+    if (state.opponents.length <= 1) { feedback('请至少保留一个对手输入区。', true); return; }
+    const i = Number(button.dataset.remove);
+    if (state.opponents[i].groups.flat().some(value => String(value).trim()) && !confirm(`删除“${state.opponents[i].name || `对手 ${i + 1}`}”及其数据？`)) return;
+    state.opponents.splice(i, 1); renderInputs(); changed();
+  });
+  $('direction').addEventListener('change', () => { state.direction = $('direction').value; changed(); });
+  $('add-opponent').addEventListener('click', () => {
+    if (state.opponents.length >= 50) return;
+    state.opponents.push({ name: `对手 ${state.opponents.length + 1}`, groups: emptyGroups() }); renderInputs(); changed();
+    document.querySelector(`[data-name="${state.opponents.length - 1}"]`).focus();
+  });
+  function collect({ silent = false } = {}) {
+    if (!silent) document.querySelectorAll('.invalid').forEach(el => { el.classList.remove('invalid'); el.removeAttribute('aria-invalid'); });
+    let firstInvalid = null;
+    const problems = [];
+    function parse(rows, side, owner, name) {
+      let bad = false;
+      const result = rows.map((row, group) => row.map((value, col) => {
+        if (!isNumber(value)) {
+          bad = true;
+          if (!silent) {
+            const el = document.querySelector(`.number-input[data-side="${side}"][data-owner="${owner}"][data-group="${group}"][data-col="${col}"]`);
+            el.classList.add('invalid'); el.setAttribute('aria-invalid', 'true'); firstInvalid ||= el;
+          }
+        }
+        return Number(value);
+      }));
+      if (bad) problems.push(`${name}需填满 15 个有效数字`);
+      return result;
+    }
+    let ownBad = false;
+    const own = state.own.map((value, index) => {
+      if (!isNumber(value)) {
+        ownBad = true;
+        if (!silent) {
+          const el = document.querySelector(`.number-input[data-side="own"][data-index="${index}"]`);
+          el.classList.add('invalid'); el.setAttribute('aria-invalid', 'true'); firstInvalid ||= el;
+        }
+      }
+      return Number(value);
+    });
+    if (ownBad) problems.push('我方需填满 15 个有效数字');
+    const opponents = [];
+    state.opponents.forEach((opponent, i) => {
+      if (opponent.groups.flat().every(value => String(value).trim() === '')) return;
+      const name = opponent.name.trim() || `对手 ${i + 1}`;
+      opponents.push({ name, groups: parse(opponent.groups, 'opponent', i, name) });
+    });
+    if (!opponents.length) problems.push('请至少填写一个完整对手，其他对手可以全部留空');
+    if (problems.length) {
+      if (!silent) { feedback(problems.join('；') + '。', true); firstInvalid?.focus(); }
+      return null;
+    }
+    return { own, opponents };
+  }
+  function chips(row) { return row.map(value => `<span class="number-chip">${escape(value)}</span>`).join(''); }
+  function renderResults(result, opponents) {
+    const { current, best, rows } = result;
+    const lift = (best.rate - current.rate) * 100;
+    const note = '已对全部 15 个数字进行跨组全局优化，下面展示一种最优解。A/B/C 随机匹配，因此同一列的数字跨组交换，整体期望胜率保持相同。';
+    $('result-content').innerHTML = `<div class="notice">${note}</div>
+      <div class="metric-grid">
+        <div class="metric-card featured"><div class="metric-label">最优期望单项胜率</div><div class="metric-value">${percent(best.rate)}</div><span class="muted">数字获胜次数 ÷ 全部比较次数</span></div>
+        <div class="metric-card"><div class="metric-label">输入顺序基准</div><div class="metric-value">${percent(current.rate)}</div><span class="muted">每 5 个暂作一组，仅用于比较</span></div>
+        <div class="metric-card"><div class="metric-label">提升幅度</div><div class="metric-value">+${Math.max(0, lift).toFixed(2)}<small> 个百分点</small></div><span class="muted">${lift > 0.000001 ? '跨组重排及位置调整带来的提升' : '输入顺序基准已达到最优值'}</span></div>
+        <div class="metric-card"><div class="metric-label">平均每场获胜</div><div class="metric-value">${decimal(best.expectedWins)}<small> / 15</small></div><span class="muted">${opponents.length} 位有效对手，等权计算</span></div>
+      </div>
+      <div class="result-heading"><h3>推荐出战顺序</h3><button type="button" id="copy-result" class="text-button">复制排法</button></div>
+      <div class="result-grid">${rows.map((row, i) => `<div class="sequence-card"><div class="sequence-head"><span class="group-label">${letters[i]}</span><span class="muted">按位置 1 → 5 出战</span></div><div class="sequence-values">${row.values.map((value, col) => `<span class="result-position"><span class="number-chip">${escape(value)}</span><span class="source-index">输入 #${row.sourceOrder[col] + 1}</span></span>`).join('')}</div></div>`).join('')}</div>
+      <div class="outcome-summary"><div class="score-bar" aria-label="获胜 ${percent(best.rate)}，持平 ${percent(best.tieRate)}，落败 ${percent(best.lossRate)}"><span class="score-win" style="width:${best.rate * 100}%"></span><span class="score-tie" style="width:${best.tieRate * 100}%"></span><span class="score-loss" style="width:${best.lossRate * 100}%"></span></div><div class="score-legend"><span>● 获胜 ${percent(best.rate)}</span><span>● 持平 ${percent(best.tieRate)}</span><span>● 落败 ${percent(best.lossRate)}</span></div></div>
+      <h3 class="detail-heading">逐个对手 · 随机匹配明细</h3>
+      <p class="muted detail-caption">每个对手有 6 种等概率匹配，每种比较 15 位。展开可查看每一位的胜、平、负；单个对手的结果可能与整体提升不同。</p>
+      <div class="comparison-grid">${best.details.map((detail, index) => `<details class="mini-result"><summary><span class="opponent-result-name">${escape(detail.name)}</span><span>${percent(current.details[index].rate)} → <strong>${percent(detail.rate)}</strong></span><span class="muted">平均赢 ${decimal(detail.expectedWins)} / 15</span></summary><div class="table-wrap"><table class="compare-table"><thead><tr><th>匹配：我方 → 对方</th><th>胜 / 平 / 负</th><th>每组 5 位的比较</th></tr></thead><tbody>${detail.cases.map(item => `<tr><td>${item.order.map((target, group) => `${letters[group]}→${letters[target]}`).join(' · ')}</td><td>${item.win} / ${item.tie} / ${item.loss}</td><td><div class="outcome-groups">${item.groups.map((outcomes, group) => `<span class="outcome-row"><b>${letters[group]}</b>${outcomes.map((value, k) => `<span class="outcome ${value === 1 ? 'win' : value === 0 ? 'tie' : 'loss'}" title="第 ${k + 1} 位：我方 ${escape(result.arranged[group][k])}，对方 ${escape(opponents[index].groups[item.order[group]][k])}">${value === 1 ? '胜' : value === 0 ? '平' : '负'}</span>`).join('')}</span>`).join('')}</div></td></tr>`).join('')}</tbody></table></div></details>`).join('')}</div>
+      <p class="calculation-footnote">精确统计 ${opponents.length} × 6 = ${opponents.length * 6} 种匹配、${best.total} 次单项比较：胜 ${best.wins}、平 ${best.ties}、负 ${best.losses}。平局不计胜，但保留在分母中。这里的胜率指单项平均获胜比例，不是整场比赛获胜概率。</p>
+      <details class="mini-result algorithm-details"><summary>如何保证全局最优</summary><p class="notice">每个输入数字都分配到一个位置列，每列恰好容纳 3 个数字。对三组等概率随机匹配，数字在同列中属于 A/B/C 哪组不改变期望获胜次数，因此可以等价覆盖 15! = ${result.search.arrangements.toLocaleString('zh-CN')} 种完整排列的搜索空间，无需逐一枚举。计算通过 ${result.search.states.toLocaleString('zh-CN')} 个容量状态、${result.search.transitions.toLocaleString('zh-CN')} 次状态转移，精确选出总收益最高的列分配。最终显示的是其中一种最优分组方式。</p></details>`;
+    $('empty-results').hidden = true; $('result-content').hidden = false;
+    $('copy-result').addEventListener('click', async () => {
+      const text = result.arranged.map((row, i) => `${letters[i]}：${row.join(', ')}`).join('\n');
+      try {
+        if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
+        else {
+          const field = document.createElement('textarea'); field.value = text; field.style.position = 'fixed'; field.style.opacity = '0'; document.body.append(field); field.select();
+          const copied = document.execCommand('copy'); field.remove(); if (!copied) throw new Error('copy');
+        }
+        $('copy-result').textContent = '已复制';
+      } catch (_) { feedback('浏览器未允许复制，可直接选中推荐排法手动复制。', true); }
+    });
+  }
+  function calculate({ silent = false, scroll = false } = {}) {
+    const input = collect({ silent }); if (!input) return false;
+    if (!silent) { feedback(''); save(); }
+    try {
+      const result = MatchOptimizer.optimize(input.own, input.opponents, state.direction, 'global');
+      renderResults(result, input.opponents); lastResult = result;
+      if (scroll) $('results').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+      return true;
+    } catch (error) {
+      if (!silent) feedback(error.message || '计算失败，请检查数据。', true);
+      return false;
+    }
+  }
+  $('calculate').addEventListener('click', () => calculate({ scroll: true }));
+  function hasData() { return [...state.own, ...state.opponents.flatMap(opponent => opponent.groups.flat())].some(value => String(value).trim() !== ''); }
+  $('demo').addEventListener('click', () => {
+    if (hasData() && !confirm('用示例替换当前数据？建议先导出需要保留的数据。')) return;
+    state = fresh();
+    state.own = [1, 2, 3, 4, 5, 2, 3, 4, 5, 6, 3, 4, 5, 6, 7].map(String);
+    state.opponents[0] = { name: '示例对手', groups: Array.from({ length: 3 }, (_, i) => state.own.slice(i * 5, i * 5 + 5)) };
+    renderInputs(); changed(); feedback('已填入我方 15 个数字和 1 位示例对手，其余 6 位留空。点击计算，查看跨组重排后的最优结果。');
+  });
+  $('reset').addEventListener('click', () => {
+    if (hasData() && !confirm('清空我方和全部对手的数据？')) return;
+    state = fresh(); renderInputs(); changed(); feedback('已清空数据，恢复默认 7 位对手。');
+  });
+  $('export-data').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob); const link = document.createElement('a');
+    link.href = url; link.download = '排阵数据.json'; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    feedback('已导出输入数据与计算规则。');
+  });
+  $('import-data').addEventListener('click', () => $('import-file').click());
+  $('import-file').addEventListener('change', async () => {
+    const file = $('import-file').files[0]; if (!file) return;
+    try {
+      if (file.size > 1024 * 1024) throw new Error('文件过大，请选择本页面导出的 JSON 文件。');
+      const imported = normalize(JSON.parse(await file.text()));
+      if (hasData() && !confirm('用导入的数据替换当前输入？')) return;
+      state = imported; renderInputs(); changed(); feedback('数据导入成功，请点击计算查看结果。');
+    } catch (error) { feedback(error instanceof SyntaxError ? '无法读取 JSON，请选择本页面导出的数据文件。' : error.message, true); }
+    finally { $('import-file').value = ''; }
+  });
+  window.addEventListener('pagehide', save);
+  renderInputs();
+  if (restored) {
+    const resultsRestored = calculate({ silent: true });
+    if (save()) $('save-status').textContent = resultsRestored ? '已恢复本地数据和计算结果' : '已恢复本地数据';
+  } else {
+    $('save-status').textContent = loadFailed ? '本地数据未能读取，请重新输入或导入备份' : '输入后自动保存在此浏览器';
+  }
+})();
+
+</script>
+</body>
+</html>

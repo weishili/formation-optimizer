@@ -31,6 +31,8 @@
     .leaderboard-section{margin:26px 0 28px}.leaderboard-wrap{margin-top:12px}.leaderboard-table{min-width:660px;font-size:12px}.leaderboard-table thead th{font-size:11px;padding:12px 14px}.leaderboard-table tbody th{font-size:12px;font-weight:500;background:transparent;color:var(--ink);padding:13px 14px;border-top:1px solid #eef2f3;text-align:left;white-space:normal;min-width:115px;max-width:230px;overflow-wrap:anywhere}.leaderboard-table td{padding:13px 14px;font-variant-numeric:tabular-nums}.leaderboard-table tr.leaderboard-own,.leaderboard-table tr.leaderboard-own:hover{background:#edf8f3}.leaderboard-own th{box-shadow:inset 3px 0 var(--teal)}.leaderboard-name{display:inline;vertical-align:middle}.leaderboard-own-badge{display:inline-block;font-size:9px;font-weight:500;border-radius:4px;padding:1px 5px;margin-left:6px;background:#d5eee4;color:#227c64}.leaderboard-rate{color:var(--teal);font-size:15px;font-weight:700}.rank-badge{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:8px;background:#f0f4f5;color:#7d909a;font-weight:650;font-size:12px}.rank-1{background:#fbefcf;color:#a77917}.rank-2{background:#e8eef4;color:#607d99}.rank-3{background:#f6e8df;color:#ad7953}.rank-tie{display:inline-block;font-size:9px;font-weight:400;margin-left:5px;color:#91a1a7}.sequence-stats{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:13px 0 16px;padding-top:12px;border-top:1px solid #edf2ef}.sequence-stats .muted{font-size:10px;display:block}.group-rate{display:block;font-size:24px;font-variant-numeric:tabular-nums;color:#24836e;line-height:1.4;margin-top:2px}.group-expectation{font-size:10px;color:#839a93;white-space:nowrap}.detail-group-rates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:12px 16px;background:#f7fbf9;border-top:1px solid #e5efea}.detail-group-rate{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;color:#80998e;font-size:10px}.detail-group-rate strong{font-size:13px;color:#2e8870}.detail-group-rate>.muted{display:block;width:100%;font-size:9px}
     @media(max-width:650px){.leaderboard-section{margin-top:21px}.leaderboard-section .result-heading{align-items:flex-start;gap:6px}.leaderboard-section .badge{font-size:9px}.leaderboard-table{min-width:610px}.leaderboard-table thead th,.leaderboard-table tbody th,.leaderboard-table td{padding:11px 10px}.leaderboard-table tbody th{min-width:100px}.leaderboard-rate{font-size:13px}.rank-badge{width:23px;height:23px;font-size:10px}.group-rate{font-size:25px}.sequence-stats{margin:12px 0}.detail-group-rates{gap:7px;padding:11px 10px}.detail-group-rate{gap:4px 6px}.detail-group-rate strong{font-size:12px}}
     .leaderboard-scroll-hint{display:none;font-size:10px;color:#7d9a91;margin-top:8px}.leaderboard-wrap:focus-visible{outline:2px solid #64c4b7;outline-offset:3px}@media(max-width:800px){.leaderboard-scroll-hint{display:block}}
+    .close-marker{display:inline-block;color:#ad7916;font-size:12px;line-height:1;vertical-align:middle;margin-left:4px}.close-summary{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:10px;color:#966615;background:#fff5db;border:1px solid #f0dfaf;border-radius:6px;padding:4px 7px;white-space:normal;line-height:1.6;max-width:100%}.sequence-close-note{font-size:10px;color:#a27622;background:#fff8e9;border-radius:6px;padding:7px 9px;margin:9px 0 0;line-height:1.8}.close-rule-note{font-size:11px;line-height:1.9;color:#8f702e;background:#fff9ed;border:1px solid #f3e7c9;border-radius:8px;padding:10px 13px;margin:12px 0}.close-rule-note .muted{color:#968979}.outcome-row{flex-wrap:wrap}.outcome-row.has-close{align-items:center;gap:5px;padding:5px 0}.outcome.close-outcome{display:inline-flex;flex-direction:column;align-items:flex-start;gap:3px;vertical-align:middle;padding:7px 9px;border:1px solid #e9cb80;border-radius:7px;background:#fff6df;color:#8b5c12;font-size:11px;line-height:1.6;white-space:normal;min-width:150px;max-width:270px;overflow-wrap:anywhere}.close-values{font-weight:650;color:#8b5c12}.close-gap{font-size:10px;font-weight:400;color:#a27b34}.compare-table tr.has-close>td{background:#fffcf5}.close-outcome .close-marker{margin-left:0}.mini-result summary:has(.close-summary){flex-wrap:wrap}.sequence-head:has(.close-marker){flex-wrap:wrap}.detail-group-rate .close-marker{margin-left:1px}
+    @media(max-width:650px){.close-summary{font-size:9px;padding:3px 6px}.mini-result summary .close-summary{margin-left:23px}.close-rule-note{font-size:10px;padding:9px 11px}.outcome.close-outcome{font-size:10px;min-width:139px;max-width:220px;padding:6px 7px}.close-gap{font-size:9px}.outcome-row.has-close{gap:4px}.close-marker{font-size:11px}.comparison-grid .compare-table td:last-child{min-width:170px}.sequence-close-note{font-size:10px}}
   </style>
 </head>
 <body>
@@ -152,6 +154,40 @@
     const total = 90 * opponents.length;
     return { wins, ties, losses, total, rate: wins / total, tieRate: ties / total, lossRate: losses / total, expectedWins: wins / (6 * opponents.length), details, groupStats: summarizeGroups(groupTotals, 6 * opponents.length) };
   }
+  function findCloseMatchups(ownArranged, opponents, direction = 'higher') {
+    validate(ownArranged, opponents, direction, 'groups');
+    if (direction === 'lower') return opponents.map(() => []);
+    const decimals = new Map();
+    const decimal = value => {
+      if (!decimals.has(value)) {
+        const [mantissa, exponent = '0'] = String(value).split('e');
+        const fraction = (mantissa.split('.')[1] || '').length;
+        decimals.set(value, { units: BigInt(mantissa.replace('.', '')), scale: fraction - Number(exponent) });
+      }
+      return decimals.get(value);
+    };
+    return opponents.map(opponent => {
+      const matches = [];
+      ownArranged.forEach((row, ownGroup) => {
+        opponent.groups.forEach((rival, opponentGroup) => {
+          row.forEach((ownValue, position) => {
+            const opponentValue = rival[position];
+            if (opponentValue <= ownValue) return;
+            // Compare canonical decimal values exactly: ordinary subtraction
+            // can turn 26.8 - 26.5 into 0.3000000000000007.
+            const a = decimal(ownValue), b = decimal(opponentValue);
+            const scale = Math.max(a.scale, b.scale, 1);
+            const gap = b.units * 10n ** BigInt(scale - b.scale) - a.units * 10n ** BigInt(scale - a.scale);
+            if (gap <= 0n || gap > 3n * 10n ** BigInt(scale - 1)) return;
+            const digits = gap.toString().padStart(scale + 1, '0');
+            const gapText = `${digits.slice(0, -scale)}.${digits.slice(-scale)}`.replace(/0+$/, '');
+            matches.push({ ownGroup, opponentGroup, position, ownValue, opponentValue, gapText });
+          });
+        });
+      });
+      return matches;
+    });
+  }
   function rankParticipants(ownArranged, opponents, direction = 'higher') {
     validate(ownArranged, opponents, direction, 'groups');
     const participants = [
@@ -270,7 +306,7 @@
     const arranged = rows.map(row => row.values);
     return { rows, arranged, current: evaluate(own, opponents, direction), best: evaluate(arranged, opponents, direction), variants: rows.reduce((count, row) => count * row.variants, 1), mode, direction };
   }
-  root.MatchOptimizer = Object.freeze({ optimize, evaluate, rankParticipants, compare, orders });
+  root.MatchOptimizer = Object.freeze({ optimize, evaluate, rankParticipants, findCloseMatchups, compare, orders });
 })(typeof window === 'undefined' ? globalThis : window);
 
 (() => {
@@ -452,8 +488,58 @@
     }
     return { own, opponents };
   }
+  function closeMarker(label) {
+    return `<span class="close-marker" role="img" aria-label="${escape(label)}">★</span>`;
+  }
+  function renderOutcome(outcome, ownValue, opponentValue, group, targetGroup, position, opportunity) {
+    const label = `我方 ${letters[group]} 组第 ${position + 1} 位 ${ownValue}，对方 ${letters[targetGroup]} 组 ${opponentValue}`;
+    if (opportunity && outcome === -1) {
+      return `<span class="outcome loss close-outcome" data-own-group="${group}" data-opponent-group="${targetGroup}" data-position="${position}" aria-label="${escape(`${label}；负，差 ${opportunity.gapText}，我方落后 0.3 以内`)}"><span class="close-values">★ 负｜我 ${escape(ownValue)} &lt; 对 ${escape(opponentValue)}</span><span class="close-gap">差 ${escape(opportunity.gapText)} · 位置 ${position + 1}</span></span>`;
+    }
+    const outcomeName = outcome === 1 ? '胜' : outcome === 0 ? '平' : '负';
+    return `<span class="outcome ${outcome === 1 ? 'win' : outcome === 0 ? 'tie' : 'loss'}" title="${escape(label)}" aria-label="${escape(`${label}；${outcomeName}`)}">${outcomeName}</span>`;
+  }
+  function renderMatchupCase(item, arranged, opponent, opportunityMap) {
+    let hasClose = false;
+    const groups = item.groups.map((outcomes, group) => {
+      const targetGroup = item.order[group];
+      const groupHasClose = outcomes.some((outcome, position) => outcome === -1 && opportunityMap.has(`${group}:${targetGroup}:${position}`));
+      if (groupHasClose) hasClose = true;
+      const cells = outcomes.map((outcome, position) => renderOutcome(outcome, arranged[group][position], opponent.groups[targetGroup][position], group, targetGroup, position, opportunityMap.get(`${group}:${targetGroup}:${position}`))).join('');
+      return `<span class="outcome-row${groupHasClose ? ' has-close' : ''}" data-own-group="${group}" data-opponent-group="${targetGroup}"><b>${letters[group]}${groupHasClose ? closeMarker(`我方 ${letters[group]} 组与对方 ${letters[targetGroup]} 组存在接近对位`) : ''}</b>${cells}</span>`;
+    }).join('');
+    const mapping = item.order.map((target, group) => `${letters[group]}→${letters[target]}`).join(' · ');
+    return `<tr${hasClose ? ' class="has-close"' : ''}><td>${mapping}${hasClose ? closeMarker('此匹配存在我方落后 0.3 以内的对位') : ''}</td><td>${item.win} / ${item.tie} / ${item.loss}</td><td><div class="outcome-groups">${groups}</div></td></tr>`;
+  }
+  function renderOpponentDetail(detail, index, result, opponent, opportunities) {
+    const opportunityMap = new Map(opportunities.map(item => [`${item.ownGroup}:${item.opponentGroup}:${item.position}`, item]));
+    const groupCounts = letters.map((_, group) => opportunities.filter(item => item.ownGroup === group).length);
+    const closeGroups = letters.filter((_, group) => groupCounts[group] > 0).join('/');
+    const closeSummary = opportunities.length ? `<span class="close-summary" aria-label="${escape(`我方 ${closeGroups} 组有 ${opportunities.length} 处落后 0.3 以内的不同对位`)}">★ ${closeGroups}组 · ${opportunities.length}处接近</span>` : '';
+    const groupRates = detail.groupStats.map((group, i) => `<span class="detail-group-rate" data-own-group="${i}"><span>${letters[i]} 组${groupCounts[i] ? closeMarker(`我方 ${letters[i]} 组有 ${groupCounts[i]} 处接近对位`) : ''}</span><strong>${percent(group.rate)}</strong><span class="muted">平均赢 ${decimal(group.expectedWins)} / 5</span></span>`).join('');
+    const cases = detail.cases.map(item => renderMatchupCase(item, result.arranged, opponent, opportunityMap)).join('');
+    return `<details class="mini-result" data-opponent-index="${index}">
+      <summary><span class="opponent-result-name">${escape(detail.name)}</span><span>${percent(result.current.details[index].rate)} → <strong>${percent(detail.rate)}</strong></span><span class="muted">平均赢 ${decimal(detail.expectedWins)} / 15</span>${closeSummary}</summary>
+      <div class="detail-group-rates" aria-label="我方各组对该对手的单项胜率">${groupRates}</div>
+      <div class="table-wrap"><table class="compare-table"><thead><tr><th scope="col">匹配：我方 → 对方</th><th scope="col">胜 / 平 / 负</th><th scope="col">每组 5 位的比较</th></tr></thead><tbody>${cases}</tbody></table></div>
+    </details>`;
+  }
+  function renderSequenceCard(row, group, stats, closeCount) {
+    const values = row.values.map((value, col) => `<span class="result-position"><span class="number-chip">${escape(value)}</span><span class="source-index">输入 #${row.sourceOrder[col] + 1}</span></span>`).join('');
+    return `<div class="sequence-card" data-own-group="${group}">
+      <div class="sequence-head"><span class="group-label">${letters[group]}</span>${closeCount ? closeMarker(`我方 ${letters[group]} 组共 ${closeCount} 处接近对位`) : ''}<span class="muted">按位置 1 → 5 出战</span></div>
+      <div class="sequence-stats"><div><span class="muted">本组单项胜率</span><strong class="group-rate">${percent(stats.rate)}</strong></div><span class="group-expectation">平均赢 ${decimal(stats.expectedWins)} / 5</span></div>
+      <div class="sequence-values">${values}</div>
+      ${closeCount ? `<p class="sequence-close-note">★ ${closeCount} 处接近对位 · 在下方标星对手中查看</p>` : ''}
+    </div>`;
+  }
   function renderResults(result, opponents) {
     const { current, best, rows, leaderboard } = result;
+    const opportunities = MatchOptimizer.findCloseMatchups(result.arranged, opponents, result.direction);
+    const groupCloseCounts = letters.map((_, group) => opportunities.reduce((count, items) => count + items.filter(item => item.ownGroup === group).length, 0));
+    const closeRule = result.direction === 'higher'
+      ? '★ 表示我方落后 0.3 以内（含 0.3）的对位；接近处数按不同对位统计，同一对位在 6 种匹配中重复出现只计一次。追平仅算平局，超过对方才算获胜。'
+      : '当前规则为数字小者获胜；提升数值的接近提示仅在“数字大者获胜”时启用。';
     const lift = (best.rate - current.rate) * 100;
     const note = '已对全部 15 个数字进行跨组全局优化，下面展示一种最优解。各组胜率对应当前展示的排法；同一列的数字跨组交换，整体期望胜率不变，但 A/B/C 各组胜率可能变化。';
     const leaderboardRows = leaderboard.map(entry => {
@@ -474,11 +560,12 @@
         <div class="table-wrap leaderboard-wrap" tabindex="0" role="region" aria-label="可横向滚动的胜率排行榜"><table id="leaderboard-table" class="compare-table leaderboard-table" aria-describedby="leaderboard-description"><thead><tr><th scope="col">名次</th><th scope="col">参赛者</th><th scope="col">总胜率</th><th scope="col">A 组</th><th scope="col">B 组</th><th scope="col">C 组</th><th scope="col">平均获胜数</th></tr></thead><tbody>${leaderboardRows}</tbody></table></div>
       </section>
       <div class="result-heading"><h3>推荐出战顺序</h3><button type="button" id="copy-result" class="text-button">复制排法</button></div>
-      <div class="result-grid">${rows.map((row, i) => `<div class="sequence-card"><div class="sequence-head"><span class="group-label">${letters[i]}</span><span class="muted">按位置 1 → 5 出战</span></div><div class="sequence-stats"><div><span class="muted">本组单项胜率</span><strong class="group-rate">${percent(best.groupStats[i].rate)}</strong></div><span class="group-expectation">平均赢 ${decimal(best.groupStats[i].expectedWins)} / 5</span></div><div class="sequence-values">${row.values.map((value, col) => `<span class="result-position"><span class="number-chip">${escape(value)}</span><span class="source-index">输入 #${row.sourceOrder[col] + 1}</span></span>`).join('')}</div></div>`).join('')}</div>
+      <div class="result-grid">${rows.map((row, i) => renderSequenceCard(row, i, best.groupStats[i], groupCloseCounts[i])).join('')}</div>
       <div class="outcome-summary"><div class="score-bar" aria-label="获胜 ${percent(best.rate)}，持平 ${percent(best.tieRate)}，落败 ${percent(best.lossRate)}"><span class="score-win" style="width:${best.rate * 100}%"></span><span class="score-tie" style="width:${best.tieRate * 100}%"></span><span class="score-loss" style="width:${best.lossRate * 100}%"></span></div><div class="score-legend"><span>● 获胜 ${percent(best.rate)}</span><span>● 持平 ${percent(best.tieRate)}</span><span>● 落败 ${percent(best.lossRate)}</span></div></div>
       <h3 class="detail-heading">逐个对手 · 随机匹配明细</h3>
       <p class="muted detail-caption">每个对手有 6 种等概率匹配，每种比较 15 位。展开可查看每一位的胜、平、负；单个对手的结果可能与整体提升不同。</p>
-      <div class="comparison-grid">${best.details.map((detail, index) => `<details class="mini-result"><summary><span class="opponent-result-name">${escape(detail.name)}</span><span>${percent(current.details[index].rate)} → <strong>${percent(detail.rate)}</strong></span><span class="muted">平均赢 ${decimal(detail.expectedWins)} / 15</span></summary><div class="detail-group-rates" aria-label="我方各组对该对手的单项胜率">${detail.groupStats.map((group, i) => `<span class="detail-group-rate"><span>${letters[i]} 组</span><strong>${percent(group.rate)}</strong><span class="muted">平均赢 ${decimal(group.expectedWins)} / 5</span></span>`).join('')}</div><div class="table-wrap"><table class="compare-table"><thead><tr><th>匹配：我方 → 对方</th><th>胜 / 平 / 负</th><th>每组 5 位的比较</th></tr></thead><tbody>${detail.cases.map(item => `<tr><td>${item.order.map((target, group) => `${letters[group]}→${letters[target]}`).join(' · ')}</td><td>${item.win} / ${item.tie} / ${item.loss}</td><td><div class="outcome-groups">${item.groups.map((outcomes, group) => `<span class="outcome-row"><b>${letters[group]}</b>${outcomes.map((value, k) => `<span class="outcome ${value === 1 ? 'win' : value === 0 ? 'tie' : 'loss'}" title="第 ${k + 1} 位：我方 ${escape(result.arranged[group][k])}，对方 ${escape(opponents[index].groups[item.order[group]][k])}">${value === 1 ? '胜' : value === 0 ? '平' : '负'}</span>`).join('')}</span>`).join('')}</div></td></tr>`).join('')}</tbody></table></div></details>`).join('')}</div>
+      <p class="notice close-rule-note">${closeRule}</p>
+      <div class="comparison-grid">${best.details.map((detail, index) => renderOpponentDetail(detail, index, result, opponents[index], opportunities[index])).join('')}</div>
       <p class="calculation-footnote">精确统计 ${opponents.length} × 6 = ${opponents.length * 6} 种匹配、${best.total} 次单项比较：胜 ${best.wins}、平 ${best.ties}、负 ${best.losses}。平局不计胜，但保留在分母中。这里的胜率指单项平均获胜比例，不是整场比赛获胜概率。</p>
       <details class="mini-result algorithm-details"><summary>如何保证全局最优</summary><p class="notice">每个输入数字都分配到一个位置列，每列恰好容纳 3 个数字。对三组等概率随机匹配，数字在同列中属于 A/B/C 哪组不改变期望获胜次数，因此可以等价覆盖 15! = ${result.search.arrangements.toLocaleString('zh-CN')} 种完整排列的搜索空间，无需逐一枚举。计算通过 ${result.search.states.toLocaleString('zh-CN')} 个容量状态、${result.search.transitions.toLocaleString('zh-CN')} 次状态转移，精确选出总收益最高的列分配。最终显示的是其中一种最优分组方式。</p></details>`;
     $('empty-results').hidden = true; $('result-content').hidden = false;

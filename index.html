@@ -28,6 +28,9 @@
     #own-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 11px}.own-number-field{display:flex;flex-direction:column;gap:5px;min-width:0}.own-number-index{font-size:10px;color:#92a3ab;text-align:left;padding-left:3px}.own-pool-note{font-size:11px;line-height:1.8;color:#7b929a;margin-bottom:15px}.rule-panel .setting{grid-column:1/-1}.algorithm-details{background:#f7faf9;border:1px solid #e6eeea;border-radius:10px;margin:14px 0;padding:11px 15px;font-size:11px;color:#78918a;line-height:1.9}.algorithm-details summary{cursor:pointer;color:#487a6a}.algorithm-details p{margin-top:8px}.slot-caption{font-size:9px;color:#92a3aa;text-align:center}.sequence-slot{min-width:0;text-align:center}.sequence-slot .number-chip{display:flex;margin:4px 0;min-width:0;padding:5px 2px}.source-index{font-size:10px;color:#8b9f9a}.sequence-values{gap:6px}.result-content .result-heading{margin-top:19px}.sequence-card{min-width:0}
     @media(max-width:650px){#own-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 10px}.own-number-field .number-input{font-size:16px;height:43px}.own-number-index{font-size:10px}.own-pool-note{font-size:10px}.result-grid .number-chip{font-size:13px}.sequence-slot .number-chip{min-height:38px}.algorithm-details{padding:10px 12px;font-size:10px}}
     .input-index{font-size:10px;color:#92a3ab;padding-left:3px}.result-position{display:flex;flex-direction:column;align-items:stretch;min-width:0;text-align:center}.result-position .number-chip{display:flex;margin:4px 0;min-width:0;min-height:37px;padding:5px 2px}.result-position .source-index{font-size:9px;white-space:nowrap}.algorithm-details>summary{justify-content:flex-start}.algorithm-details>p{margin:10px 0 0}
+    .leaderboard-section{margin:26px 0 28px}.leaderboard-wrap{margin-top:12px}.leaderboard-table{min-width:660px;font-size:12px}.leaderboard-table thead th{font-size:11px;padding:12px 14px}.leaderboard-table tbody th{font-size:12px;font-weight:500;background:transparent;color:var(--ink);padding:13px 14px;border-top:1px solid #eef2f3;text-align:left;white-space:normal;min-width:115px;max-width:230px;overflow-wrap:anywhere}.leaderboard-table td{padding:13px 14px;font-variant-numeric:tabular-nums}.leaderboard-table tr.leaderboard-own,.leaderboard-table tr.leaderboard-own:hover{background:#edf8f3}.leaderboard-own th{box-shadow:inset 3px 0 var(--teal)}.leaderboard-name{display:inline;vertical-align:middle}.leaderboard-own-badge{display:inline-block;font-size:9px;font-weight:500;border-radius:4px;padding:1px 5px;margin-left:6px;background:#d5eee4;color:#227c64}.leaderboard-rate{color:var(--teal);font-size:15px;font-weight:700}.rank-badge{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:8px;background:#f0f4f5;color:#7d909a;font-weight:650;font-size:12px}.rank-1{background:#fbefcf;color:#a77917}.rank-2{background:#e8eef4;color:#607d99}.rank-3{background:#f6e8df;color:#ad7953}.rank-tie{display:inline-block;font-size:9px;font-weight:400;margin-left:5px;color:#91a1a7}.sequence-stats{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:13px 0 16px;padding-top:12px;border-top:1px solid #edf2ef}.sequence-stats .muted{font-size:10px;display:block}.group-rate{display:block;font-size:24px;font-variant-numeric:tabular-nums;color:#24836e;line-height:1.4;margin-top:2px}.group-expectation{font-size:10px;color:#839a93;white-space:nowrap}.detail-group-rates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:12px 16px;background:#f7fbf9;border-top:1px solid #e5efea}.detail-group-rate{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;color:#80998e;font-size:10px}.detail-group-rate strong{font-size:13px;color:#2e8870}.detail-group-rate>.muted{display:block;width:100%;font-size:9px}
+    @media(max-width:650px){.leaderboard-section{margin-top:21px}.leaderboard-section .result-heading{align-items:flex-start;gap:6px}.leaderboard-section .badge{font-size:9px}.leaderboard-table{min-width:610px}.leaderboard-table thead th,.leaderboard-table tbody th,.leaderboard-table td{padding:11px 10px}.leaderboard-table tbody th{min-width:100px}.leaderboard-rate{font-size:13px}.rank-badge{width:23px;height:23px;font-size:10px}.group-rate{font-size:25px}.sequence-stats{margin:12px 0}.detail-group-rates{gap:7px;padding:11px 10px}.detail-group-rate{gap:4px 6px}.detail-group-rate strong{font-size:12px}}
+    .leaderboard-scroll-hint{display:none;font-size:10px;color:#7d9a91;margin-top:8px}.leaderboard-wrap:focus-visible{outline:2px solid #64c4b7;outline-offset:3px}@media(max-width:800px){.leaderboard-scroll-hint{display:block}}
   </style>
 </head>
 <body>
@@ -117,15 +120,21 @@
   }
   function evaluate(own, opponents, direction = 'higher') {
     let wins = 0, ties = 0, losses = 0;
+    const groupTotals = Array.from({ length: 3 }, () => ({ wins: 0, ties: 0, losses: 0 }));
+    const summarizeGroups = (stats, matches) => stats.map(group => {
+      const total = 5 * matches;
+      return { ...group, total, rate: group.wins / total, tieRate: group.ties / total, lossRate: group.losses / total, expectedWins: group.wins / matches };
+    });
     const details = opponents.map(opponent => {
+      const groupCounts = Array.from({ length: 3 }, () => ({ wins: 0, ties: 0, losses: 0 }));
       const cases = orders.map(order => {
         let win = 0, tie = 0, loss = 0;
         const groups = own.map((row, i) => {
           const outcomes = row.map((value, k) => compare(value, opponent.groups[order[i]][k], direction));
           for (const outcome of outcomes) {
-            if (outcome === 1) win++;
-            else if (outcome === 0) tie++;
-            else loss++;
+            if (outcome === 1) { win++; groupCounts[i].wins++; }
+            else if (outcome === 0) { tie++; groupCounts[i].ties++; }
+            else { loss++; groupCounts[i].losses++; }
           }
           return outcomes;
         });
@@ -133,10 +142,63 @@
       });
       const sum = cases.reduce((acc, item) => ({ win: acc.win + item.win, tie: acc.tie + item.tie, loss: acc.loss + item.loss }), { win: 0, tie: 0, loss: 0 });
       wins += sum.win; ties += sum.tie; losses += sum.loss;
-      return { name: opponent.name, cases, wins: sum.win, ties: sum.tie, losses: sum.loss, rate: sum.win / 90, expectedWins: sum.win / 6 };
+      groupCounts.forEach((group, i) => {
+        groupTotals[i].wins += group.wins;
+        groupTotals[i].ties += group.ties;
+        groupTotals[i].losses += group.losses;
+      });
+      return { name: opponent.name, cases, wins: sum.win, ties: sum.tie, losses: sum.loss, rate: sum.win / 90, expectedWins: sum.win / 6, groupStats: summarizeGroups(groupCounts, 6) };
     });
     const total = 90 * opponents.length;
-    return { wins, ties, losses, total, rate: wins / total, tieRate: ties / total, lossRate: losses / total, expectedWins: wins / (6 * opponents.length), details };
+    return { wins, ties, losses, total, rate: wins / total, tieRate: ties / total, lossRate: losses / total, expectedWins: wins / (6 * opponents.length), details, groupStats: summarizeGroups(groupTotals, 6 * opponents.length) };
+  }
+  function rankParticipants(ownArranged, opponents, direction = 'higher') {
+    validate(ownArranged, opponents, direction, 'groups');
+    const participants = [
+      { id: 'own', name: '我方', isOwn: true, groups: ownArranged },
+      ...opponents.map((opponent, i) => ({ id: `opponent-${i + 1}`, name: opponent.name, isOwn: false, groups: opponent.groups }))
+    ];
+    const counts = participants.map(() => ({
+      wins: 0, ties: 0, losses: 0,
+      groups: Array.from({ length: 3 }, () => ({ wins: 0, ties: 0, losses: 0 }))
+    }));
+    // Each pair of groups occurs twice among the six random matchings. Count
+    // each participant pair once, assigning the reverse outcome to its rival.
+    for (let i = 0; i < participants.length; i++) {
+      for (let j = i + 1; j < participants.length; j++) {
+        for (let a = 0; a < 3; a++) {
+          for (let b = 0; b < 3; b++) {
+            for (let column = 0; column < 5; column++) {
+              const result = compare(participants[i].groups[a][column], participants[j].groups[b][column], direction);
+              const left = result === 1 ? 'wins' : result === 0 ? 'ties' : 'losses';
+              const right = result === 1 ? 'losses' : result === 0 ? 'ties' : 'wins';
+              counts[i][left] += 2;
+              counts[j][right] += 2;
+              counts[i].groups[a][left] += 2;
+              counts[j].groups[b][right] += 2;
+            }
+          }
+        }
+      }
+    }
+    const matches = opponents.length * 6;
+    const summarize = (stats, total) => ({
+      wins: stats.wins, ties: stats.ties, losses: stats.losses, total,
+      rate: stats.wins / total, tieRate: stats.ties / total, lossRate: stats.losses / total,
+      expectedWins: stats.wins / matches
+    });
+    const leaderboard = participants.map((participant, i) => ({
+      id: participant.id, name: participant.name, isOwn: participant.isOwn,
+      ...summarize(counts[i], 15 * matches),
+      groupStats: counts[i].groups.map(group => summarize(group, 5 * matches))
+    }));
+    // Stable sorting preserves input order for tied participants; ranks skip
+    // positions after a tie (for example 1, 1, 3).
+    leaderboard.sort((a, b) => b.wins - a.wins);
+    leaderboard.forEach((entry, i) => {
+      entry.rank = i > 0 && entry.wins === leaderboard[i - 1].wins ? leaderboard[i - 1].rank : i + 1;
+    });
+    return leaderboard;
   }
   // Random group matching gives every input value the same three possible opponents
   // in its chosen column. Assign 15 distinct input occurrences to 5 columns of
@@ -182,7 +244,7 @@
     const baseline = Array.from({ length: 3 }, (_, group) => own.slice(group * 5, group * 5 + 5));
     return {
       rows, arranged, current: evaluate(baseline, opponents, direction), best: evaluate(arranged, opponents, direction),
-      mode: 'global', direction, score: dp[1023],
+      mode: 'global', direction, score: dp[1023], leaderboard: rankParticipants(arranged, opponents, direction),
       search: { states: 1024, transitions, arrangements: 1307674368000, allocations: 168168000 }
     };
   }
@@ -208,7 +270,7 @@
     const arranged = rows.map(row => row.values);
     return { rows, arranged, current: evaluate(own, opponents, direction), best: evaluate(arranged, opponents, direction), variants: rows.reduce((count, row) => count * row.variants, 1), mode, direction };
   }
-  root.MatchOptimizer = Object.freeze({ optimize, evaluate, compare, orders });
+  root.MatchOptimizer = Object.freeze({ optimize, evaluate, rankParticipants, compare, orders });
 })(typeof window === 'undefined' ? globalThis : window);
 
 (() => {
@@ -390,11 +452,14 @@
     }
     return { own, opponents };
   }
-  function chips(row) { return row.map(value => `<span class="number-chip">${escape(value)}</span>`).join(''); }
   function renderResults(result, opponents) {
-    const { current, best, rows } = result;
+    const { current, best, rows, leaderboard } = result;
     const lift = (best.rate - current.rate) * 100;
-    const note = '已对全部 15 个数字进行跨组全局优化，下面展示一种最优解。A/B/C 随机匹配，因此同一列的数字跨组交换，整体期望胜率保持相同。';
+    const note = '已对全部 15 个数字进行跨组全局优化，下面展示一种最优解。各组胜率对应当前展示的排法；同一列的数字跨组交换，整体期望胜率不变，但 A/B/C 各组胜率可能变化。';
+    const leaderboardRows = leaderboard.map(entry => {
+      const tied = leaderboard.filter(other => other.wins === entry.wins && other.total === entry.total).length > 1;
+      return `<tr class="${entry.isOwn ? 'leaderboard-own' : ''}" data-participant="${escape(entry.id)}"><td><span class="rank-badge${entry.rank <= 3 ? ` rank-${entry.rank}` : ''}">${entry.rank}</span>${tied ? '<span class="rank-tie">并列</span>' : ''}</td><th scope="row"><span class="leaderboard-name">${escape(entry.name)}</span>${entry.isOwn ? '<span class="badge green leaderboard-own-badge">优化后</span>' : ''}</th><td class="leaderboard-rate"><strong>${percent(entry.rate)}</strong></td>${entry.groupStats.map(group => `<td>${percent(group.rate)}</td>`).join('')}<td>${decimal(entry.expectedWins)} <span class="muted">/ 15</span></td></tr>`;
+    }).join('');
     $('result-content').innerHTML = `<div class="notice">${note}</div>
       <div class="metric-grid">
         <div class="metric-card featured"><div class="metric-label">最优期望单项胜率</div><div class="metric-value">${percent(best.rate)}</div><span class="muted">数字获胜次数 ÷ 全部比较次数</span></div>
@@ -402,12 +467,18 @@
         <div class="metric-card"><div class="metric-label">提升幅度</div><div class="metric-value">+${Math.max(0, lift).toFixed(2)}<small> 个百分点</small></div><span class="muted">${lift > 0.000001 ? '跨组重排及位置调整带来的提升' : '输入顺序基准已达到最优值'}</span></div>
         <div class="metric-card"><div class="metric-label">平均每场获胜</div><div class="metric-value">${decimal(best.expectedWins)}<small> / 15</small></div><span class="muted">${opponents.length} 位有效对手，等权计算</span></div>
       </div>
+      <section class="leaderboard-section" aria-labelledby="leaderboard-title">
+        <div class="result-heading"><h3 id="leaderboard-title">总胜率排行榜</h3><span class="badge">${leaderboard.length} 位参赛者 · 两两对战</span></div>
+        <p id="leaderboard-description" class="muted detail-caption">全部 ${leaderboard.length} 位参赛者两两对战，每位对其余 ${leaderboard.length - 1} 位等权；我方使用优化后的排法，对手保持录入排法。总胜率和各组胜率均为随机匹配下的单项平均胜率，不是整场获胜概率。相同胜率并列排名。</p>
+        <p class="leaderboard-scroll-hint">左右滑动表格，查看 A / B / C 各组胜率 →</p>
+        <div class="table-wrap leaderboard-wrap" tabindex="0" role="region" aria-label="可横向滚动的胜率排行榜"><table id="leaderboard-table" class="compare-table leaderboard-table" aria-describedby="leaderboard-description"><thead><tr><th scope="col">名次</th><th scope="col">参赛者</th><th scope="col">总胜率</th><th scope="col">A 组</th><th scope="col">B 组</th><th scope="col">C 组</th><th scope="col">平均获胜数</th></tr></thead><tbody>${leaderboardRows}</tbody></table></div>
+      </section>
       <div class="result-heading"><h3>推荐出战顺序</h3><button type="button" id="copy-result" class="text-button">复制排法</button></div>
-      <div class="result-grid">${rows.map((row, i) => `<div class="sequence-card"><div class="sequence-head"><span class="group-label">${letters[i]}</span><span class="muted">按位置 1 → 5 出战</span></div><div class="sequence-values">${row.values.map((value, col) => `<span class="result-position"><span class="number-chip">${escape(value)}</span><span class="source-index">输入 #${row.sourceOrder[col] + 1}</span></span>`).join('')}</div></div>`).join('')}</div>
+      <div class="result-grid">${rows.map((row, i) => `<div class="sequence-card"><div class="sequence-head"><span class="group-label">${letters[i]}</span><span class="muted">按位置 1 → 5 出战</span></div><div class="sequence-stats"><div><span class="muted">本组单项胜率</span><strong class="group-rate">${percent(best.groupStats[i].rate)}</strong></div><span class="group-expectation">平均赢 ${decimal(best.groupStats[i].expectedWins)} / 5</span></div><div class="sequence-values">${row.values.map((value, col) => `<span class="result-position"><span class="number-chip">${escape(value)}</span><span class="source-index">输入 #${row.sourceOrder[col] + 1}</span></span>`).join('')}</div></div>`).join('')}</div>
       <div class="outcome-summary"><div class="score-bar" aria-label="获胜 ${percent(best.rate)}，持平 ${percent(best.tieRate)}，落败 ${percent(best.lossRate)}"><span class="score-win" style="width:${best.rate * 100}%"></span><span class="score-tie" style="width:${best.tieRate * 100}%"></span><span class="score-loss" style="width:${best.lossRate * 100}%"></span></div><div class="score-legend"><span>● 获胜 ${percent(best.rate)}</span><span>● 持平 ${percent(best.tieRate)}</span><span>● 落败 ${percent(best.lossRate)}</span></div></div>
       <h3 class="detail-heading">逐个对手 · 随机匹配明细</h3>
       <p class="muted detail-caption">每个对手有 6 种等概率匹配，每种比较 15 位。展开可查看每一位的胜、平、负；单个对手的结果可能与整体提升不同。</p>
-      <div class="comparison-grid">${best.details.map((detail, index) => `<details class="mini-result"><summary><span class="opponent-result-name">${escape(detail.name)}</span><span>${percent(current.details[index].rate)} → <strong>${percent(detail.rate)}</strong></span><span class="muted">平均赢 ${decimal(detail.expectedWins)} / 15</span></summary><div class="table-wrap"><table class="compare-table"><thead><tr><th>匹配：我方 → 对方</th><th>胜 / 平 / 负</th><th>每组 5 位的比较</th></tr></thead><tbody>${detail.cases.map(item => `<tr><td>${item.order.map((target, group) => `${letters[group]}→${letters[target]}`).join(' · ')}</td><td>${item.win} / ${item.tie} / ${item.loss}</td><td><div class="outcome-groups">${item.groups.map((outcomes, group) => `<span class="outcome-row"><b>${letters[group]}</b>${outcomes.map((value, k) => `<span class="outcome ${value === 1 ? 'win' : value === 0 ? 'tie' : 'loss'}" title="第 ${k + 1} 位：我方 ${escape(result.arranged[group][k])}，对方 ${escape(opponents[index].groups[item.order[group]][k])}">${value === 1 ? '胜' : value === 0 ? '平' : '负'}</span>`).join('')}</span>`).join('')}</div></td></tr>`).join('')}</tbody></table></div></details>`).join('')}</div>
+      <div class="comparison-grid">${best.details.map((detail, index) => `<details class="mini-result"><summary><span class="opponent-result-name">${escape(detail.name)}</span><span>${percent(current.details[index].rate)} → <strong>${percent(detail.rate)}</strong></span><span class="muted">平均赢 ${decimal(detail.expectedWins)} / 15</span></summary><div class="detail-group-rates" aria-label="我方各组对该对手的单项胜率">${detail.groupStats.map((group, i) => `<span class="detail-group-rate"><span>${letters[i]} 组</span><strong>${percent(group.rate)}</strong><span class="muted">平均赢 ${decimal(group.expectedWins)} / 5</span></span>`).join('')}</div><div class="table-wrap"><table class="compare-table"><thead><tr><th>匹配：我方 → 对方</th><th>胜 / 平 / 负</th><th>每组 5 位的比较</th></tr></thead><tbody>${detail.cases.map(item => `<tr><td>${item.order.map((target, group) => `${letters[group]}→${letters[target]}`).join(' · ')}</td><td>${item.win} / ${item.tie} / ${item.loss}</td><td><div class="outcome-groups">${item.groups.map((outcomes, group) => `<span class="outcome-row"><b>${letters[group]}</b>${outcomes.map((value, k) => `<span class="outcome ${value === 1 ? 'win' : value === 0 ? 'tie' : 'loss'}" title="第 ${k + 1} 位：我方 ${escape(result.arranged[group][k])}，对方 ${escape(opponents[index].groups[item.order[group]][k])}">${value === 1 ? '胜' : value === 0 ? '平' : '负'}</span>`).join('')}</span>`).join('')}</div></td></tr>`).join('')}</tbody></table></div></details>`).join('')}</div>
       <p class="calculation-footnote">精确统计 ${opponents.length} × 6 = ${opponents.length * 6} 种匹配、${best.total} 次单项比较：胜 ${best.wins}、平 ${best.ties}、负 ${best.losses}。平局不计胜，但保留在分母中。这里的胜率指单项平均获胜比例，不是整场比赛获胜概率。</p>
       <details class="mini-result algorithm-details"><summary>如何保证全局最优</summary><p class="notice">每个输入数字都分配到一个位置列，每列恰好容纳 3 个数字。对三组等概率随机匹配，数字在同列中属于 A/B/C 哪组不改变期望获胜次数，因此可以等价覆盖 15! = ${result.search.arrangements.toLocaleString('zh-CN')} 种完整排列的搜索空间，无需逐一枚举。计算通过 ${result.search.states.toLocaleString('zh-CN')} 个容量状态、${result.search.transitions.toLocaleString('zh-CN')} 次状态转移，精确选出总收益最高的列分配。最终显示的是其中一种最优分组方式。</p></details>`;
     $('empty-results').hidden = true; $('result-content').hidden = false;
